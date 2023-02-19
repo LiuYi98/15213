@@ -45,6 +45,12 @@ void queue_free(queue_t *q) {
     if (q == NULL) {
         return;
     }
+    while (q->head != NULL) {
+        list_ele_t *cur_head = q->head;
+        q->head = q->head->next;
+        free(cur_head->value);
+        free(cur_head);
+    }
     free(q);
 }
 
@@ -70,7 +76,7 @@ bool queue_insert_head(queue_t *q, const char *s) {
     newh->value = malloc(strlen(s) + 1);
     if (newh->value == NULL) {
         return false;
-    } 
+    }
     strcpy(newh->value, s);
     if (q->head == NULL) {
         q->tail = newh;
@@ -117,7 +123,7 @@ bool queue_insert_tail(queue_t *q, const char *s) {
     // fixme: what should do when q is empty?
     q->tail->next = newt;
     q->tail = newt;
-    q->size +=1;
+    q->size += 1;
     return true;
 }
 
@@ -150,9 +156,10 @@ bool queue_remove_head(queue_t *q, char *buf, size_t bufsize) {
     curhead = q->head;
     if (q->size == 1) {
         q->tail = NULL;
-    } 
+    }
     q->head = q->head->next;
     q->size -= 1;
+    free(curhead->value);
     free(curhead);
     return true;
 }
