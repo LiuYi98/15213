@@ -35,6 +35,19 @@ queue_t *queue_new(void) {
     return q;
 }
 
+
+
+
+void list_ele_free(list_ele_t *let) {
+    if (let == NULL) {
+        return;
+    }
+    free(let->value);
+    free(let->next);
+    free(let);
+}
+
+
 /**
  * @brief Frees all memory used by a queue
  * @param[in] q The queue to free
@@ -45,12 +58,13 @@ void queue_free(queue_t *q) {
     if (q == NULL) {
         return;
     }
-    while (q->head != NULL) {
-        list_ele_t *cur_head = q->head;
-        q->head = q->head->next;
-        free(cur_head->value);
-        free(cur_head);
-    }
+    list_ele_free(q->head);
+    // while (q->head != NULL) {
+    //     list_ele_t *cur_head = q->head;
+    //     q->head = q->head->next;
+    //     free(cur_head->value);
+    //     free(cur_head);
+    // }
     free(q);
 }
 
@@ -67,6 +81,9 @@ void queue_free(queue_t *q) {
  * @return false if q is NULL, or memory allocation failed
  */
 bool queue_insert_head(queue_t *q, const char *s) {
+    if (q == NULL) {
+        return false;
+    }
     list_ele_t *newh;
     /* What should you do if the q is NULL? */
     newh = malloc(sizeof(list_ele_t));
@@ -120,7 +137,6 @@ bool queue_insert_tail(queue_t *q, const char *s) {
     if (q->head == NULL) {
         q->head = newt;
     }
-    // fixme: what should do when q is empty?
     q->tail->next = newt;
     q->tail = newt;
     q->size += 1;
