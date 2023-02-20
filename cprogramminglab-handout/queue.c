@@ -54,12 +54,13 @@ void queue_free(queue_t *q) {
     if (q == NULL) {
         return;
     }
-    // list_ele_free(q->head);
-    while (q->head != NULL) {
-        list_ele_t *cur_head = q->head;
-        q->head = q->head->next;
+    list_ele_t *cur_head = q->head;
+    list_ele_t *next = NULL;
+    while (cur_head != NULL) {
         free(cur_head->value);
+        next = cur_head->next;
         free(cur_head);
+        cur_head = next;
     }
     free(q);
 }
@@ -126,9 +127,8 @@ bool queue_insert_tail(queue_t *q, const char *s) {
     if (newt == NULL) {
         return false;
     }
-    char *str = malloc(sizeof(char) * (strlen(s) + 1));
-    if (str == NULL) {
-        free(newt);
+    newt->value = malloc(sizeof(char) * (strlen(s) + 1));
+    if (newt->value == NULL) {
         return false;
     }
     strcpy(str, s);
@@ -208,20 +208,21 @@ size_t queue_size(queue_t *q) {
  * @param[in] q The queue to reverse
  */
 void queue_reverse(queue_t *q) {
-    if (q == NULL || q->size <= 1) {
+    if (q == NULL || q->size == 1) {
         return;
     }
-    list_ele_t *p, *pnext;
-    q->tail = q->head;
-    p = q->head->next, pnext = p->next;
-    q->head->next = NULL;
+    list_ele_t *p, *pq;
+    p = q->head->next;
+    pq = p->next;
     while (true) {
         p->next = q->head;
         q->head = p;
-        p = pnext;
-        if (p == NULL) {
+        p = pq;
+        if (pq == NULL) {
             break;
         }
-        pnext = p->next;
+        pq = pq->next;
     }
+
+    /* You need to write the code for this function */
 }
