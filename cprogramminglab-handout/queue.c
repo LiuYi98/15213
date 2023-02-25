@@ -35,9 +35,6 @@ queue_t *queue_new(void) {
     return q;
 }
 
-
-
-
 void list_ele_free(list_ele_t *let) {
     if (let == NULL) {
         return;
@@ -46,7 +43,6 @@ void list_ele_free(list_ele_t *let) {
     free(let->next);
     free(let);
 }
-
 
 /**
  * @brief Frees all memory used by a queue
@@ -58,13 +54,13 @@ void queue_free(queue_t *q) {
     if (q == NULL) {
         return;
     }
-    list_ele_free(q->head);
-    // while (q->head != NULL) {
-    //     list_ele_t *cur_head = q->head;
-    //     q->head = q->head->next;
-    //     free(cur_head->value);
-    //     free(cur_head);
-    // }
+    // list_ele_free(q->head);
+    while (q->head != NULL) {
+        list_ele_t *cur_head = q->head;
+        q->head = q->head->next;
+        free(cur_head->value);
+        free(cur_head);
+    }
     free(q);
 }
 
@@ -90,8 +86,9 @@ bool queue_insert_head(queue_t *q, const char *s) {
     if (newh == NULL) {
         return false;
     }
-    newh->value = malloc(strlen(s) + 1);
+    newh->value = malloc(sizeof(char) * (strlen(s) + 1));
     if (newh->value == NULL) {
+        free(newh);
         return false;
     }
     strcpy(newh->value, s);
@@ -129,16 +126,21 @@ bool queue_insert_tail(queue_t *q, const char *s) {
     if (newt == NULL) {
         return false;
     }
-    newt->value = malloc(strlen(s) + 1);
-    if (newt->value == NULL) {
+    char *str = malloc(sizeof(char) * (strlen(s) + 1));
+    if (str == NULL) {
+        free(newt);
         return false;
     }
-    strcpy(newt->value, s);
-    if (q->head == NULL) {
+    strcpy(str, s);
+    newt->value = str;
+    newt->next = NULL;
+    if (q->size == 0) {
         q->head = newt;
+        q->tail = newt;
+    } else {
+        q->tail->next = newt;
+        q->tail = newt;
     }
-    q->tail->next = newt;
-    q->tail = newt;
     q->size += 1;
     return true;
 }
@@ -166,17 +168,17 @@ bool queue_remove_head(queue_t *q, char *buf, size_t bufsize) {
     }
     if (buf != NULL) {
         strncpy(buf, q->head->value, bufsize - 1);
+        buf[bufsize - 1] = '\0';
     }
-    /* You need to fix up this code. */
     list_ele_t *curhead;
     curhead = q->head;
-    if (q->size == 1) {
-        q->tail = NULL;
-    }
     q->head = q->head->next;
     q->size -= 1;
     free(curhead->value);
     free(curhead);
+    if (q->size == 1) {
+        q->tail = NULL;
+    }
     return true;
 }
 
@@ -206,8 +208,20 @@ size_t queue_size(queue_t *q) {
  * @param[in] q The queue to reverse
  */
 void queue_reverse(queue_t *q) {
-    if (q == NULL) {
+    if (q == NULL || q->size <= 1) {
         return;
     }
-    /* You need to write the code for this function */
+    list_ele_t *p, *pnext;
+    q->tail = q->head;
+    p = q->head->next, pnext = p->next;
+    q->head->next = NULL;
+    while (true) {
+        p->next = q->head;
+        q->head = p;
+        p = pnext;
+        if (p == NULL) {
+            break;
+        }
+        pnext = p->next;
+    }
 }
